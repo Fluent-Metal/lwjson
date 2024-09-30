@@ -191,6 +191,28 @@ prv_parse_property_name(lwjson_int_str_t* pobj, lwjson_token_t* t) {
 }
 
 /**
+ * \brief           Calculate new value for exponent 10^exponent.
+ * \param[in]       exp: Exponent.
+ * \param[in]       is_minus: Indicates whether the exponent is negative.
+ * \return          Value of 10^exponent.
+ */
+static lwjson_real_t prv_power10(lwjson_int_t exp, uint8_t is_minus)
+{
+    lwjson_real_t result = (lwjson_real_t)1;
+    lwjson_real_t base = (lwjson_real_t)10;
+
+    while (exp > 0) {
+        if (exp % 2 == 1) {
+            result *= base;
+        }
+        base *= base;
+        exp /= 2;
+    }
+
+    return is_minus ? ((lwjson_real_t)1 / result) : result;
+}
+
+/**
  * \brief           Parse number as described in RFC4627
  * \param[in,out]   pobj: Pointer to text that is modified on success
  * \param[out]      tout: Pointer to output number format
@@ -269,12 +291,7 @@ prv_parse_number(lwjson_int_str_t* pobj, lwjson_type_t* tout, lwjson_real_t* fou
         }
 
         /* Calculate new value for exponent 10^exponent */
-        /* TODO: We could change this to lookup tables... */
-        if (is_minus_exp) {
-            for (; exp_cnt > 0; real_num /= (lwjson_real_t)10, --exp_cnt) {}
-        } else {
-            for (; exp_cnt > 0; real_num *= (lwjson_real_t)10, --exp_cnt) {}
-        }
+        real_num *= prv_power10(exp_cnt, is_minus_exp);
     }
 
     /* Write output values */
