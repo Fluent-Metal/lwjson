@@ -3,6 +3,7 @@
 ## Develop
 
 - Rework library CMake with removed INTERFACE type
+- Improve the calculation with square-multiply algorithm (@SKlimaRA)
 
 ## 1.7.0
 
