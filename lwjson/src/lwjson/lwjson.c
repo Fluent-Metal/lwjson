@@ -201,12 +201,10 @@ static lwjson_real_t prv_power10(lwjson_int_t exp, uint8_t is_minus)
     lwjson_real_t result = (lwjson_real_t)1;
     lwjson_real_t base = (lwjson_real_t)10;
 
-    while (exp > 0) {
-        if (exp % 2 == 1) {
+    for (;exp > 0; base *= base, exp >>= 1) {
+        if ((exp & 1) == 1) {
             result *= base;
         }
-        base *= base;
-        exp /= 2;
     }
 
     return is_minus ? ((lwjson_real_t)1 / result) : result;
