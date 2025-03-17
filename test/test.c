@@ -14,7 +14,7 @@ static lwjson_token_t tokens[4096];
 static lwjson_t lwjson;
 
 /* Test JSON parsing */
-static void
+static int
 test_json_parse(void) {
     size_t test_failed = 0, test_passed = 0;
 
@@ -114,10 +114,11 @@ test_json_parse(void) {
 
     /* Print results */
     printf("JSON parse test result pass/fail: %d/%d\r\n\r\n", (int)test_passed, (int)test_failed);
+    return test_failed > 0 ? -1 : 0;
 }
 
 /* Test number of tokens necessary for parsing */
-static void
+static int
 test_parse_token_count(void) {
     size_t test_failed = 0, test_passed = 0;
 
@@ -154,10 +155,11 @@ test_parse_token_count(void) {
 
     /* Print results */
     printf("JSON token count test result pass/fail: %d/%d\r\n\r\n", (int)test_passed, (int)test_failed);
+    return test_failed > 0 ? -1 : 0;
 }
 
 /* Test JSON data types */
-static void
+static int
 test_json_data_types(void) {
     const lwjson_token_t* t;
     size_t test_failed = 0, test_passed = 0;
@@ -263,7 +265,7 @@ test_json_data_types(void) {
     /* First parse JSON */
     if (lwjson_parse(&lwjson, json_complete) != lwjsonOK) {
         printf("Could not parse LwJSON data types..\r\n");
-        return;
+        return -1;
     }
 
     /* Now that it is parsed, check all input keys */
@@ -287,10 +289,11 @@ test_json_data_types(void) {
 
     /* Print results */
     printf("Data type test result pass/fail: %d/%d\r\n\r\n", (int)test_passed, (int)test_failed);
+    return test_failed > 0 ? -1 : 0;
 }
 
 /* Test find function */
-static void
+static int
 test_find_function(void) {
     size_t test_failed = 0, test_passed = 0;
     const lwjson_token_t* token;
@@ -322,15 +325,15 @@ test_find_function(void) {
     /* First parse JSON */
     if (lwjson_parse(&lwjson, json_str) != lwjsonOK) {
         printf("Could not parse JSON string..\r\n");
-        return;
+        return -1;
     }
 
 #define RUN_TEST(c)                                                                                                    \
     if ((c)) {                                                                                                         \
         ++test_passed;                                                                                                 \
     } else {                                                                                                           \
-        ++test_failed;                                                                                                 \
         printf("Test failed on line %d\r\n", __LINE__);                                                                \
+        ++test_failed;                                                                                                 \
     }
 
     /* Run all tests */
@@ -400,22 +403,30 @@ test_find_function(void) {
 
     /* Print results */
     printf("Find function test result pass/fail: %d/%d\r\n\r\n", (int)test_passed, (int)test_failed);
+    return test_failed > 0 ? -1 : 0;
 }
 
 /**
  * \brief           Run all tests entry point
  */
-void
+int
 test_run(void) {
+    int ret = 0;
+
     /* Init LwJSON */
-    lwjson_init(&lwjson, tokens, LWJSON_ARRAYSIZE(tokens));
+    ret |= lwjson_init(&lwjson, tokens, LWJSON_ARRAYSIZE(tokens)) != lwjsonOK;
 
     /* Test JSON parse */
-    test_json_parse();
+    ret |= test_json_parse();
 
     /* Test find function */
-    test_find_function();
+    ret |= test_find_function();
 
     /* Parse input text and compare against expected data types */
-    test_json_data_types();
+    ret |= test_json_data_types();
+
+    /* Test number of tokens */
+    ret |= test_parse_token_count();
+
+    return 0;
 }

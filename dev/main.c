@@ -11,7 +11,7 @@ static lwjson_t lwjson;
 /* Stream parser */
 static lwjson_stream_parser_t stream_parser;
 
-extern void test_run(void);
+extern int test_run(void);
 extern void example_minimal_run(void);
 extern void example_traverse_run(void);
 extern void example_stream_run(void);
@@ -23,6 +23,16 @@ static void jsp_stream_callback(lwjson_stream_parser_t* jsp, lwjson_stream_type_
 
 int
 main() {
+#if 1
+    return test_run();
+#if 1
+    example_minimal_run();
+    example_traverse_run();
+    example_stream_run();
+#endif
+    return 0;
+#endif
+#if 0
     HANDLE f;
     DWORD file_size;
     size_t token_cnt = 0;
@@ -32,15 +42,6 @@ main() {
     (void)token_cnt;
 #if 0
     trial_stream_run();
-    return 0;
-#endif
-#if 1
-    test_run();
-#if 1
-    example_minimal_run();
-    example_traverse_run();
-    example_stream_run();
-#endif
     return 0;
 #endif
 
@@ -117,6 +118,7 @@ exit:
         json_text = NULL;
     }
     return 0;
+#endif
 }
 
 /**
