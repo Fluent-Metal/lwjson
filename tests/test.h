@@ -11,6 +11,8 @@
 #ifndef TEST_HDR_H
 #define TEST_HDR_H
 
+#include "math.h"
+
 /* Assert check */
 #define TEST_ASSERT(x)                                                                                                 \
     do {                                                                                                               \
@@ -19,5 +21,8 @@
             return -1;                                                                                                 \
         }                                                                                                              \
     } while (0)
+
+#define INT_IS_EQUAL(a, b)   ((a) == (b))
+#define FLOAT_IS_EQUAL(a, b) ((((a) * (a)) - ((b) * (b))) <= 0.0001)
 
 #endif /* TEST_HDR_H */

@@ -6,4 +6,4 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 )
 
 # Options file
-set(LWMEM_OPTS_FILE ${CMAKE_CURRENT_LIST_DIR}/lwjson_opts.h)
+set(LWJSON_OPTS_FILE ${CMAKE_CURRENT_LIST_DIR}/lwjson_opts.h)

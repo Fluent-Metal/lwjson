@@ -2,7 +2,7 @@
 
 # Add more sources
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/test_parse_token_count.c
+    ${CMAKE_CURRENT_LIST_DIR}/test_stream.c
 )
 
 # Options file
