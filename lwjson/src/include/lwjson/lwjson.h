@@ -69,6 +69,10 @@ typedef enum {
     LWJSON_TYPE_NULL,     /*!< Null value */
 } lwjson_type_t;
 
+#if defined(LWJSON_DEV)
+extern const char* const lwjson_type_strings[];
+#endif
+
 /**
  * \brief           Real data type
  */
