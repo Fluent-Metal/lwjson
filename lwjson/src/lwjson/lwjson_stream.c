@@ -304,12 +304,12 @@ start_over:
                 if (jsp->parse_state == LWJSON_STREAM_STATE_WAITINGFIRSTCHAR) {
                     jsp->stack_pos = 0;
                 }
+                SEND_EVT(jsp, chr == '{' ? LWJSON_STREAM_TYPE_OBJECT : LWJSON_STREAM_TYPE_ARRAY);
                 if (!prv_stack_push(jsp, chr == '{' ? LWJSON_STREAM_TYPE_OBJECT : LWJSON_STREAM_TYPE_ARRAY)) {
                     LWJSON_DEBUG(jsp, "Cannot push object/array to stack\r\n");
                     return lwjsonERRMEM;
                 }
                 jsp->parse_state = LWJSON_STREAM_STATE_PARSING;
-                SEND_EVT(jsp, chr == '{' ? LWJSON_STREAM_TYPE_OBJECT : LWJSON_STREAM_TYPE_ARRAY);
 
                 /* Check if this is start of number or "true", "false" or "null" */
             } else if (chr == '-' || (chr >= '0' && chr <= '9') || chr == 't' || chr == 'f' || chr == 'n') {
