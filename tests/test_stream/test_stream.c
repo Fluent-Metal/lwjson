@@ -1,5 +1,6 @@
 #include <inttypes.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +30,15 @@ typedef struct {
     float numbers_real;
 
     char long_string[512];
+
+    size_t event_counter;
+    bool event_error;
 } parsed_data_t;
+
+typedef struct {
+    lwjson_stream_type_t type;
+    size_t stack_pos;
+} event_data_t;
 
 #define LONG_STRING_TEST                                                                                               \
     "this is a very long string because why we wouldn't do it if we can and because this has to be tested tested"
@@ -51,6 +60,53 @@ static const char* json_stream_to_parse = "\
 }\
 ";
 
+// clang-format off
+static const event_data_t expected_events[] = {
+    {LWJSON_STREAM_TYPE_OBJECT, 0},
+        {LWJSON_STREAM_TYPE_KEY, 1},
+            {LWJSON_STREAM_TYPE_ARRAY, 2},
+                {LWJSON_STREAM_TYPE_NUMBER, 3},
+                {LWJSON_STREAM_TYPE_NUMBER, 3},
+                {LWJSON_STREAM_TYPE_NUMBER, 3},
+            {LWJSON_STREAM_TYPE_ARRAY_END, 2},
+        {LWJSON_STREAM_TYPE_KEY, 1},
+            {LWJSON_STREAM_TYPE_OBJECT, 2},
+                {LWJSON_STREAM_TYPE_KEY, 3},
+                    {LWJSON_STREAM_TYPE_NUMBER, 4},
+                {LWJSON_STREAM_TYPE_KEY, 3},
+                    {LWJSON_STREAM_TYPE_NUMBER, 4},
+            {LWJSON_STREAM_TYPE_OBJECT_END, 2},
+        {LWJSON_STREAM_TYPE_KEY, 1},
+            {LWJSON_STREAM_TYPE_ARRAY, 2},
+                {LWJSON_STREAM_TYPE_ARRAY, 3},
+                    {LWJSON_STREAM_TYPE_NUMBER, 4},
+                    {LWJSON_STREAM_TYPE_NUMBER, 4},
+                    {LWJSON_STREAM_TYPE_NUMBER, 4},
+                {LWJSON_STREAM_TYPE_ARRAY_END, 3},
+                {LWJSON_STREAM_TYPE_ARRAY, 3},
+                    {LWJSON_STREAM_TYPE_NUMBER, 4},
+                    {LWJSON_STREAM_TYPE_NUMBER, 4},
+                    {LWJSON_STREAM_TYPE_NUMBER, 4},
+                {LWJSON_STREAM_TYPE_ARRAY_END, 3},
+            {LWJSON_STREAM_TYPE_ARRAY_END, 2},
+        {LWJSON_STREAM_TYPE_KEY, 1},
+            {LWJSON_STREAM_TYPE_NUMBER, 2},
+        {LWJSON_STREAM_TYPE_KEY, 1},
+            // 8 calls to transfer 107 characters in chunks of 15
+            {LWJSON_STREAM_TYPE_STRING, 2},
+            {LWJSON_STREAM_TYPE_STRING, 2},
+            {LWJSON_STREAM_TYPE_STRING, 2},
+            {LWJSON_STREAM_TYPE_STRING, 2},
+            {LWJSON_STREAM_TYPE_STRING, 2},
+            {LWJSON_STREAM_TYPE_STRING, 2},
+            {LWJSON_STREAM_TYPE_STRING, 2},
+            {LWJSON_STREAM_TYPE_STRING, 2},
+    {LWJSON_STREAM_TYPE_OBJECT_END, 0},
+};
+// clang-format on
+
+static const size_t num_expected_events = sizeof(expected_events) / sizeof(expected_events[0]);
+
 static lwjson_stream_parser_t parser;
 static parsed_data_t parsed_data;
 
@@ -62,6 +118,23 @@ static parsed_data_t parsed_data;
  */
 static void
 prv_parser_callback(struct lwjson_stream_parser* jsp, lwjson_stream_type_t type) {
+    /* Check if event data is as expected, but complain only for the first error */
+    if (!parsed_data.event_error) {
+        if (parsed_data.event_counter < num_expected_events) {
+            event_data_t expected_event = expected_events[parsed_data.event_counter];
+            if (type != expected_event.type || jsp->stack_pos != expected_event.stack_pos) {
+                printf("ERROR for event #%lu: Expected %s with stack_pos %lu, got %s with stack_pos %lu\n",
+                       parsed_data.event_counter + 1, lwjson_type_strings[expected_event.type],
+                       expected_event.stack_pos, lwjson_type_strings[type], jsp->stack_pos);
+                parsed_data.event_error = true;
+            }
+        } else {
+            printf("ERROR: Received more events than expected\n");
+            parsed_data.event_error = true;
+        }
+    }
+    parsed_data.event_counter++;
+
     /* To process array values */
     if (jsp->stack_pos == 3 && lwjson_stack_seq_3(jsp, 0, OBJECT, KEY, ARRAY)) {
         if (type == LWJSON_STREAM_TYPE_NUMBER) {
@@ -155,6 +228,10 @@ test_run(void) {
 
     /* Check string */
     RUN_TEST(strcmp(LONG_STRING_TEST, parsed_data.long_string) == 0);
+
+    /* Check event types */
+    RUN_TEST(parsed_data.event_counter == num_expected_events);
+    RUN_TEST(!parsed_data.event_error);
 
     return test_failed > 0 ? -1 : 0;
 }
