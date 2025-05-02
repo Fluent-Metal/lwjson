@@ -253,6 +253,8 @@ start_over:
                     return lwjsonERRJSON;
                 }
 
+                SEND_EVT(jsp, chr == '}' ? LWJSON_STREAM_TYPE_OBJECT_END : LWJSON_STREAM_TYPE_ARRAY_END);
+
                 /*
                  * Check if above is a key type
                  * and remove it too as we finished with processing of potential case.
@@ -262,7 +264,6 @@ start_over:
                 if (prv_stack_get_top(jsp) == LWJSON_STREAM_TYPE_KEY) {
                     prv_stack_pop(jsp);
                 }
-                SEND_EVT(jsp, chr == '}' ? LWJSON_STREAM_TYPE_OBJECT_END : LWJSON_STREAM_TYPE_ARRAY_END);
 
                 /* If that is the end of JSON */
                 if (jsp->stack_pos == 0) {
