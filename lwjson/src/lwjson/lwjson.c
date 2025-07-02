@@ -136,7 +136,8 @@ prv_parse_string(lwjson_int_str_t* pobj, const char** pout, size_t* poutlen) {
                 case 't': break;
                 case 'u':
                     ++pobj->p;
-                    for (size_t i = 0; i < 4; ++i, ++len) {
+                    size_t i;
+                    for (i = 0; i < 4; ++i, ++len) {
                         if (!((*pobj->p >= '0' && *pobj->p <= '9') || (*pobj->p >= 'a' && *pobj->p <= 'f')
                               || (*pobj->p >= 'A' && *pobj->p <= 'F'))) {
                             return lwjsonERRJSON;
@@ -370,7 +371,8 @@ prv_find(const lwjson_token_t* parent, const char* path) {
                 size_t index = 0;
 
                 /* Parse number */
-                for (size_t i = 1; i < segment_len; ++i) {
+                size_t i;
+                for (i = 1; i < segment_len; ++i) {
                     if (segment[i] < '0' || segment[i] > '9') {
                         return NULL;
                     } else {
@@ -391,7 +393,8 @@ prv_find(const lwjson_token_t* parent, const char* path) {
             }
 
             /* Scan all indexes and get first match */
-            for (const lwjson_token_t* tkn = parent->u.first_child; tkn != NULL; tkn = tkn->next) {
+            const lwjson_token_t *tkn;
+            for (tkn = parent->u.first_child; tkn != NULL; tkn = tkn->next) {
                 const lwjson_token_t* tmp = prv_find(tkn, path);
                 if (tmp != NULL) {
                     return tmp;
@@ -401,7 +404,8 @@ prv_find(const lwjson_token_t* parent, const char* path) {
             if (parent->type != LWJSON_TYPE_OBJECT) {
                 return NULL;
             }
-            for (const lwjson_token_t* tkn = parent->u.first_child; tkn != NULL; tkn = tkn->next) {
+            const lwjson_token_t* tkn;
+            for (tkn = parent->u.first_child; tkn != NULL; tkn = tkn->next) {
                 if (tkn->token_name_len == segment_len && !strncmp(tkn->token_name, segment, segment_len)) {
                     const lwjson_token_t* tmp;
                     if (is_last) {
