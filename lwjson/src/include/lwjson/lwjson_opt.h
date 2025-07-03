@@ -59,7 +59,7 @@ extern "C" {
  * This is used for numbers in \ref LWJSON_TYPE_NUM_REAL token data type.
  */
 #ifndef LWJSON_CFG_REAL_TYPE
-#define LWJSON_CFG_REAL_TYPE float
+#define LWJSON_CFG_REAL_TYPE double
 #endif
 
 /**
@@ -69,7 +69,7 @@ extern "C" {
  * This is used for numbers in \ref LWJSON_TYPE_NUM_INT token data type.
  */
 #ifndef LWJSON_CFG_INT_TYPE
-#define LWJSON_CFG_INT_TYPE long long
+#define LWJSON_CFG_INT_TYPE uint32_t
 #endif
 
 /**
