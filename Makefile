@@ -7,6 +7,8 @@ TI_BIN_DIR := $(TI_DIR)/bin
 SRC_DIR := ./lwjson/src/lwjson
 INC_DIR := ./lwjson/src/include ./lwjson/src/include/lwjson
 BUILD_DIR := ./build
+ASM_DIR := $(BUILD_DIR)/asm
+LST_DIR := $(BUILD_DIR)/lst
 LIB_DIR := ./lib
 
 INCLUDES += $(TI_INC_DIR) $(INC_DIR)
@@ -32,7 +34,9 @@ clean:
 $(BUILD_DIR)/%.obj: $(SRC_DIR)/%.c
 	@echo "Building $@ from $<..."
 	@mkdir -p "$(dir $@)"
-	@$(CC) "$<" $(CFLAGS) -fr"$(dir $@)"
+	@mkdir -p "$(ASM_DIR)"
+	@mkdir -p "$(LST_DIR)"
+	@$(CC) -k -q -al -as --mem_model:data=far "$<" $(CFLAGS) -fr"$(dir $@)" -fs"$(ASM_DIR)" -ff"$(LST_DIR)" -fb"$(LST_DIR)"
 
 $(LWJSON_LIB): $(OBJECTS)
 	@echo "Building $@ from $<..."
